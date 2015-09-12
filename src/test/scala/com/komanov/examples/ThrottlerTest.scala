@@ -1,6 +1,5 @@
 package com.komanov.examples
 
-import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
 import java.util.concurrent.{CountDownLatch, Executors, Semaphore, TimeUnit}
 
 import org.specs2.mutable.{After, Specification}
@@ -21,17 +20,17 @@ class ThrottlerTest extends Specification {
     }
 
     "throw exception once reached the limit [naive, flaky]" in new ctx {
-      for (i <- 0 until maxCount) {
+      for (i <- 1 to maxCount) {
         Future {
           throttler(waitForever())
         }
       }
 
-      throttler(waitForever()) must throwA[ThrottledException]
+      throttler {} must throwA[ThrottledException]
     }
 
     "throw exception once reached the limit [naive, bad]" in new ctx {
-      for (i <- 0 until maxCount) {
+      for (i <- 1 to maxCount) {
         Future {
           throttler(waitForever())
         }
@@ -39,12 +38,13 @@ class ThrottlerTest extends Specification {
 
       Thread.sleep(1000)
 
-      throttler(waitForever()) must throwA[ThrottledException]
+      throttler {} must throwA[ThrottledException]
     }
 
-    "throw exception once reached the limit [still flaky]" in new ctx {
-      val barrier = new CountDownLatch(1)
-      for (i <- 0 until maxCount) {
+    "throw exception once reached the limit [working]" in new ctx {
+      val barrier = new CountDownLatch(maxCount)
+
+      for (i <- 1 to maxCount) {
         Future {
           throttler {
             barrier.countDown()
@@ -53,35 +53,9 @@ class ThrottlerTest extends Specification {
         }
       }
 
-      barrier.await()
-      throttler(waitForever()) must throwA[ThrottledException]
-    }
+      barrier.await(5, TimeUnit.SECONDS) must beTrue
 
-    "throw exception once reached the limit [working]" in new ctx {
-      var success = new AtomicBoolean()
-      val exceptionLatch = new CountDownLatch(1)
-      val activeCount = new AtomicInteger()
-
-      for (i <- 0 to maxCount) {
-        Future {
-          activeCount.incrementAndGet()
-          try {
-            throttler(waitForever())
-          } finally {
-            activeCount.decrementAndGet()
-          }
-        }.onFailure({
-          case e: ThrottledException =>
-            success.set(true)
-            exceptionLatch.countDown()
-          case ex =>
-            ex.printStackTrace()
-        })
-      }
-
-      exceptionLatch.await(5, TimeUnit.SECONDS) must beTrue
-      success.get() must beTrue
-      activeCount.get() must be_==(maxCount)
+      throttler {} must throwA[ThrottledException]
     }
   }
 
@@ -99,8 +73,11 @@ class ThrottlerTest extends Specification {
       e.shutdownNow()
     }
 
-    def waitForever(): Unit = {
+    def waitForever(): Unit = try {
       waitForeverLatch.await()
+    } catch {
+      case _: InterruptedException =>
+      case ex: Throwable => throw ex
     }
   }
 }
