@@ -5,17 +5,18 @@ import java.util.UUID
 /*
 The lastest run result:
 
-original avg 423 ns, total 4237782281
-java 0   avg 471 ns, total 4713609987
-java 1   avg 354 ns, total 3544927207
-java 2   avg 213 ns, total 2138386912
-java 3   avg 143 ns, total 1438326044
-java 4   avg 109 ns, total 1099210061
-java 5   avg  77 ns, total  778478559
- */
+original avg 353 ns, total 7072824462
+java 0   avg 473 ns, total 9462440447
+java 1   avg 340 ns, total 6819987157
+java 2   avg 171 ns, total 3433067273
+java 3   avg 145 ns, total 2914499208
+java 4   avg 111 ns, total 2226519520
+java 5   avg 81 ns, total 1628705887
+java f   avg 81 ns, total 1623636361
+*/
 object GuidParserPerformanceTest extends App {
 
-  val N = 10000000
+  val N = 20000000
 
   type ParserFunc = String => UUID
 
@@ -31,7 +32,11 @@ object GuidParserPerformanceTest extends App {
   val javaFast3F: ParserFunc = UuidJava3Utils.fromStringFast
   val javaFast4F: ParserFunc = UuidJava4Utils.fromStringFast
   val javaFast5F: ParserFunc = UuidJava5Utils.fromStringFast
+  val javaFastFF: ParserFunc = UuidJavaFinalUtils.fromStringFast
 
+  val algorithms = Seq(originalF, /*scalaFast,F*/ javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F, javaFastFF)
+
+  doWarmUp()
   doFuncTest()
 
   //doTest("scala   ", scalaFastF)
@@ -42,12 +47,13 @@ object GuidParserPerformanceTest extends App {
   doTest("java 3  ", javaFast3F)
   doTest("java 4  ", javaFast4F)
   doTest("java 5  ", javaFast5F)
+  doTest("java f  ", javaFast5F)
 
   def doTest(name: String, f: ParserFunc): Unit = {
-    // warm up
-    for (i <- 0 until (N / 10)) {
-      f(uuid2)
-    }
+    Runtime.getRuntime.gc()
+    Runtime.getRuntime.runFinalization()
+    Runtime.getRuntime.gc()
+    Runtime.getRuntime.gc()
 
     val start = System.nanoTime()
     for (_ <- 0 until N) {
@@ -58,8 +64,17 @@ object GuidParserPerformanceTest extends App {
     println(s"$name avg $avg ns, total $duration")
   }
 
+  def doWarmUp() = {
+    // warm up
+    for (i <- 0 until (N / 10)) {
+      for (a <- algorithms) {
+        a(uuid2)
+      }
+    }
+
+  }
+
   def doFuncTest() = {
-    val algorithms = Seq(originalF, /*scalaFast,F*/ javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F)
     val uuids = Seq(uuid1, uuid2, uuid3)
 
     algorithms.foreach(a => new UuidTest(a).run())
