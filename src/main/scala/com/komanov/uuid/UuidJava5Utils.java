@@ -42,39 +42,6 @@ public class UuidJava5Utils
         return index;
     }
 
-    private static final int[] digits = calculateDigits();
-
-    private static int digit(char ch)
-    {
-        return ch >= digits.length ? -1 : digits[ch];
-    }
-
-    private static int[] calculateDigits()
-    {
-        int[] result = new int[(int) 'f' + 1];
-        for (int i = 0; i < result.length; ++i)
-        {
-            result[i] = -1;
-        }
-
-        for (char ch = '0'; ch <= '9'; ++ch)
-        {
-            result[ch] = ch - '0';
-        }
-
-        for (char ch = 'A'; ch <= 'F'; ++ch)
-        {
-            result[ch] = 10 + (ch - 'A');
-        }
-
-        for (char ch = 'a'; ch <= 'f'; ++ch)
-        {
-            result[ch] = 10 + (ch - 'a');
-        }
-
-        return result;
-    }
-
     private static long parseHex(final String s, final int from, final int to)
             throws NumberFormatException
     {
@@ -97,7 +64,7 @@ public class UuidJava5Utils
         {
             // Accumulating negatively avoids surprises near MAX_VALUE
             char ch = s.charAt(i++);
-            final int digit = digit(ch);
+            final int digit = Character.digit(ch, 16);
             if (digit < 0)
             {
                 if (i == from && ch == '+')

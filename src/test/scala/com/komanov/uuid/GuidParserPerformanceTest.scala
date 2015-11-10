@@ -16,7 +16,7 @@ java f   avg 81 ns, total 1623636361
 */
 object GuidParserPerformanceTest extends App {
 
-  val N = 20000000
+  val N = 10000000
 
   type ParserFunc = String => UUID
 
@@ -25,7 +25,12 @@ object GuidParserPerformanceTest extends App {
   val uuid3 = "ffffffff-ffff-ffff-ffff-ffffffffffff"
 
   val originalF: ParserFunc = UUID.fromString
-  //val scalaFastF: ParserFunc = UuidScalaUtils.fromStringFast
+/*
+  val scalaFast1F: ParserFunc = UuidScala1Utils.fromStringFast
+  val scalaFast2F: ParserFunc = UuidScala2Utils.fromStringFast
+  val scalaFast3F: ParserFunc = UuidScala3Utils.fromStringFast
+  val scalaFast4F: ParserFunc = UuidScala4Utils.fromStringFast
+*/
   val javaFast0F: ParserFunc = UuidJava0Utils.fromStringFast
   val javaFast1F: ParserFunc = UuidJava1Utils.fromStringFast
   val javaFast2F: ParserFunc = UuidJava2Utils.fromStringFast
@@ -33,21 +38,32 @@ object GuidParserPerformanceTest extends App {
   val javaFast4F: ParserFunc = UuidJava4Utils.fromStringFast
   val javaFast5F: ParserFunc = UuidJava5Utils.fromStringFast
   val javaFastFF: ParserFunc = UuidJavaFinalUtils.fromStringFast
+  val javaFastEF: ParserFunc = UuidJavaEpicUtils.fromStringFast
 
-  val algorithms = Seq(originalF, /*scalaFast,F*/ javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F, javaFastFF)
+  val algorithms = Seq(
+    originalF,
+    /*scalaFast1F, scalaFast2F, scalaFast3F, scalaFast4F,*/
+    javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F, javaFastFF, javaFastEF
+  )
 
   doWarmUp()
   doFuncTest()
 
-  //doTest("scala   ", scalaFastF)
   doTest("original", originalF)
+/*
+  doTest("scala 1  ", scalaFast1F)
+  doTest("scala 2  ", scalaFast2F)
+  doTest("scala 3  ", scalaFast3F)
+  doTest("scala 4  ", scalaFast4F)
+*/
   doTest("java 0  ", javaFast0F)
   doTest("java 1  ", javaFast1F)
   doTest("java 2  ", javaFast2F)
   doTest("java 3  ", javaFast3F)
   doTest("java 4  ", javaFast4F)
   doTest("java 5  ", javaFast5F)
-  doTest("java f  ", javaFast5F)
+  doTest("java f  ", javaFastFF)
+  doTest("java E  ", javaFastEF)
 
   def doTest(name: String, f: ParserFunc): Unit = {
     Runtime.getRuntime.gc()
