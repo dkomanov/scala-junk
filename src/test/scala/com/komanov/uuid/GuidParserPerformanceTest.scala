@@ -25,12 +25,12 @@ object GuidParserPerformanceTest extends App {
   val uuid3 = "ffffffff-ffff-ffff-ffff-ffffffffffff"
 
   val originalF: ParserFunc = UUID.fromString
-/*
   val scalaFast1F: ParserFunc = UuidScala1Utils.fromStringFast
   val scalaFast2F: ParserFunc = UuidScala2Utils.fromStringFast
   val scalaFast3F: ParserFunc = UuidScala3Utils.fromStringFast
   val scalaFast4F: ParserFunc = UuidScala4Utils.fromStringFast
-*/
+  val scalaFastFF: ParserFunc = UuidScalaFinalUtils.fromStringFast
+  val scalaFastEF: ParserFunc = UuidScalaEpicUtils.fromStringFast
   val javaFast0F: ParserFunc = UuidJava0Utils.fromStringFast
   val javaFast1F: ParserFunc = UuidJava1Utils.fromStringFast
   val javaFast2F: ParserFunc = UuidJava2Utils.fromStringFast
@@ -42,7 +42,7 @@ object GuidParserPerformanceTest extends App {
 
   val algorithms = Seq(
     originalF,
-    /*scalaFast1F, scalaFast2F, scalaFast3F, scalaFast4F,*/
+    scalaFast1F, scalaFast2F, scalaFast3F, scalaFast4F, scalaFastFF, scalaFastEF,
     javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F, javaFastFF, javaFastEF
   )
 
@@ -50,12 +50,12 @@ object GuidParserPerformanceTest extends App {
   doFuncTest()
 
   doTest("original", originalF)
-/*
   doTest("scala 1  ", scalaFast1F)
   doTest("scala 2  ", scalaFast2F)
   doTest("scala 3  ", scalaFast3F)
   doTest("scala 4  ", scalaFast4F)
-*/
+  doTest("scala f  ", scalaFastFF)
+  doTest("scala e  ", scalaFastEF)
   doTest("java 0  ", javaFast0F)
   doTest("java 1  ", javaFast1F)
   doTest("java 2  ", javaFast2F)
