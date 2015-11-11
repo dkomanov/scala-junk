@@ -39,11 +39,12 @@ object GuidParserPerformanceTest extends App {
   val javaFast5F: ParserFunc = UuidJava5Utils.fromStringFast
   val javaFastFF: ParserFunc = UuidJavaFinalUtils.fromStringFast
   val javaFastEF: ParserFunc = UuidJavaEpicUtils.fromStringFast
+  val javaFastE2F: ParserFunc = UuidJavaEpic2Utils.fromStringFast
 
   val algorithms = Seq(
     originalF,
     scalaFast1F, scalaFast2F, scalaFast3F, scalaFast4F, scalaFastFF, scalaFastEF,
-    javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F, javaFastFF, javaFastEF
+    javaFast0F, javaFast1F, javaFast2F, javaFast3F, javaFast4F, javaFast5F, javaFastFF, javaFastEF, javaFastE2F
   )
 
   doWarmUp()
@@ -64,6 +65,7 @@ object GuidParserPerformanceTest extends App {
   doTest("java 5  ", javaFast5F)
   doTest("java f  ", javaFastFF)
   doTest("java E  ", javaFastEF)
+  doTest("java E2 ", javaFastE2F)
 
   def doTest(name: String, f: ParserFunc): Unit = {
     Runtime.getRuntime.gc()
